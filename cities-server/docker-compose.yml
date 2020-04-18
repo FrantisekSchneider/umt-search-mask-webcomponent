@@ -1,0 +1,15 @@
+version: '3.3'
+
+services:
+    # Start (Lightweight MOCKED) Server providing cities
+    cities-server:
+        image: williamyeh/json-server
+        command: --port 9000  --watch /cities-server/cities.json
+        volumes:
+            - ./:/cities-server
+        ports:
+            - "9000:9000"
+
+volumes:
+    cities-server:
+

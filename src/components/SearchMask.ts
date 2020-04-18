@@ -1,11 +1,30 @@
 import {html, LitElement, property} from "lit-element";
 
+interface City {
+	name: string
+}
 
 class SearchMask extends LitElement {
 
-	@property() clickCount: number = 1;
+	@property({type: String}) fromCity: string = ""
+	@property({type: Array}) fromCities: Array<City> = []
 
-	protected render(): unknown {
+	cities: Array<City> = []
+	toCity: string = ""
+
+	constructor() {
+		super();
+
+		fetch('http://0.0.0.0:9000/cities?country=CZ&country=DE').then(data => {
+			return data.json()
+		}).then(cities => {
+			this.cities = cities;
+		});
+	}
+
+
+	protected render() {
+
 		return html`
 
 <style>
@@ -23,23 +42,34 @@ class SearchMask extends LitElement {
 		padding-left: 7px;
 	}
 	
+	li {
+		list-style: none;
+	}
+	li:hover {
+		border: aqua 1px solid;
+		background-color: green;
+		color: white;
+	}
+	
 </style>
 
-
-<div  class="flix-box flix-box--highlighted umt-centered">
+<div class="flix-box flix-box--highlighted umt-centered">
 	   <div class="flix-col">
 	        <div class="flix-control">
 	            <div class="flix-input">
-	                <label class="flix-label flix-input__label" for="form-control-simple">From</label>
-	                <input id="form-control-simple" type="text" class="flix-input__field" placeholder="" />
+	                <label class="flix-label flix-input__label" for="form-control-from">From</label>
+	                <input id="form-control-from" type="text" class="flix-input__field"  value=${this.fromCity} @keyup="${this.handleChange}" />
 	            </div>
-	        </div>
+	               <div id="cities" class="flix-box umt-centered">
+					    <ul>${this.fromCities
+			.map(item => html`<li>${item.name}</li>`)}</ul>
+	               </div>
 	    </div>
 	   <div class="flix-col">
 	        <div class="flix-control">
 	            <div class="flix-input">
-	                <label class="flix-label flix-input__label" for="form-control-simple">To</label>
-	                <input id="form-control-simple" type="text" class="flix-input__field" placeholder="" />
+	                <label class="flix-label flix-input__label" for="form-control-to">To</label>
+	                <input id="form-control-to" type="text" class="flix-input__field" .value=${this.toCity} placeholder="" />
 	            </div>
 	        </div>
 	   </div>
@@ -51,11 +81,15 @@ class SearchMask extends LitElement {
 	    </button>
 	</div>
  
+ 
 </div>
-
 		`
 	}
 
+	handleChange() {
+		let value = this.shadowRoot.getElementById("form-control-from")['value']
+		this.fromCities = this.cities.filter(i => i.name.includes(value))
+	}
 }
 
 customElements.define('umt-search-mask', SearchMask)
